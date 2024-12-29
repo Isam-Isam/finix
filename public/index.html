@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finix - Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #002b5b, #00a6ff);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Chatbot Container */
+    .chat-container {
+      width: 90%;
+      max-width: 600px;
+      height: 85%;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      background-color: #00a6ff;
+      padding: 20px;
+      text-align: center;
+      color: white;
+      font-size: 1.8em;
+      font-weight: bold;
+      border-bottom: 3px solid #002b5b;
+    }
+
+    /* Messages Area */
+    .messages {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bot-message, .user-message {
+      background: #f1f1f1;
+      border-radius: 10px;
+      padding: 15px;
+      position: relative;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .user-message {
+      background: #00a6ff;
+      color: white;
+      text-align: right;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(10px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Input Area */
+    .input-container {
+      border-top: 2px solid #f1f1f1;
+      display: flex;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .input-container input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    .input-container button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #00a6ff;
+      color: white;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .input-container button:hover {
+      background-color: #0086cc;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.8em;
+      color: #666;
+    }
+
+    .footer span {
+      font-weight: bold;
+      color: #00a6ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- Header -->
+    <div class="header">Finix</div>
+
+    <!-- Messages -->
+    <div class="messages">
+      <!-- First Bot Message -->
+      <div class="bot-message">
+        I'm Finix, created by <strong>Isam Ahmed</strong>. How can I assist you today?
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Type your message here..." />
+      <button id="sendButton">Send</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Created by <span>Isam Ahmed</span>
+    </div>
+  </div>
+
+  <script>
+    const socket = io(); // Connect to the server
+    const sendButton = document.getElementById('sendButton');
+    const userInput = document.getElementById('userInput');
+    const messagesContainer = document.querySelector('.messages');
+
+    // Send message when the Send button is clicked
+    sendButton.addEventListener('click', () => {
+      const userMessage = userInput.value.trim();
+      if (userMessage === "") return;
+
+      // Add user message to chat
+      const userMessageDiv = document.createElement('div');
+      userMessageDiv.className = 'user-message';
+      userMessageDiv.textContent = userMessage;
+      messagesContainer.appendChild(userMessageDiv);
+
+      // Clear input field
+      userInput.value = "";
+
+      // Send the message to the server
+      socket.emit('message', userMessage);
+
+      // Scroll to the bottom of the chat
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+
+    // Listen for responses from the server
+    socket.on('response', (responseMessage) => {
+      const botMessageDiv = document.createElement('div');
+      botMessageDiv.className = 'bot-message';
+      botMessageDiv.textContent = responseMessage;
+      messagesContainer.appendChild(botMessageDiv);
+
+      // Scroll to the bottom of the chat
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+  </script>
+</body>
+</html>
